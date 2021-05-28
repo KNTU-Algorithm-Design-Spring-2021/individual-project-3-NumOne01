@@ -5,13 +5,20 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class Dictionary {
-    private String filePath;
-    private HashMap<String, Integer> words;
+    private final String filePath = "src/The_Oxford_3000.txt";
+    private HashMap<String, Integer> words = new HashMap<>();
+    private static Dictionary dictionary;
+    private double totalWordsLength = 0;
 
-    Dictionary(String filPath) {
-        this.filePath = filPath;
-        words = new HashMap<>();
+    private Dictionary() {
         readData();
+    }
+
+    public static Dictionary getInstance() {
+        if (dictionary == null) {
+            dictionary = new Dictionary();
+        }
+        return dictionary;
     }
 
     private void readData() {
@@ -21,6 +28,7 @@ public class Dictionary {
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 words.put(data, 1);
+                totalWordsLength += data.length();
             }
             myReader.close();
         } catch (FileNotFoundException e) {
@@ -29,8 +37,15 @@ public class Dictionary {
         }
     }
 
-    public boolean isValidWord(String word) {
+    public double getCountOfWords() {
+        return words.size();
+    }
 
+    public double getTotalWordsLength() {
+        return totalWordsLength;
+    }
+
+    public boolean isValidWord(String word) {
         return words.get(word.toLowerCase(Locale.ROOT)) != null;
     }
 }

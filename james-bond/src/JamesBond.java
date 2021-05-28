@@ -6,7 +6,7 @@ public class JamesBond {
     Dictionary dictionary;
 
     JamesBond() {
-        dictionary = new Dictionary("src/The_Oxford_3000.txt");
+        dictionary = Dictionary.getInstance();
     }
 
     /**
@@ -21,7 +21,7 @@ public class JamesBond {
      * @param words       list of strings consists of possible words
      * @param answers     array of strings consists of possible answers
      */
-    public void decodeUtil(String codedString, int from, LinkedList<String> words, LinkedList<String> answers) {
+    private void decodeUtil(String codedString, int from, LinkedList<String> words, LinkedList<String> answers) {
         if (from >= codedString.length()) {
             String decodedString = join(words, " ");
             answers.add(decodedString);
@@ -95,12 +95,73 @@ public class JamesBond {
         return array;
     }
 
+    /**
+     * counts count of promising children
+     *
+     * @param codedString coded string
+     * @return count of promising children
+     */
+    private int countPromisingChildren(String codedString) {
+        int from = 0, countOfPromisingChildren = 0;
+        String word;
+        for (int i = from; i < codedString.length(); i++) {
+            word = codedString.substring(from, i + 1);
+            if (isPromising(word)) {
+                countOfPromisingChildren++;
+            }
+        }
+        return countOfPromisingChildren;
+    }
+
+    private int countChildren(String codedString) {
+        return (int) Math.pow(2, codedString.length());
+    }
+
+    /**
+     * counts number of calls for algorithm
+     *
+     * @param codedString coded string
+     * @return count of calls
+     */
+    private int countOfCalls(String codedString) {
+        int from = 0, countOfPromisingChildren, countOfNodes = 1, countOfChildren = 0;
+        double averageWordLength = dictionary.getTotalWordsLength() / dictionary.getCountOfWords();
+
+        do {
+            countOfPromisingChildren = countPromisingChildren(codedString.substring(from));
+            from = (int) (Math.random() * averageWordLength + from);
+            if (from > codedString.length()) break;
+            countOfChildren = countChildren(codedString.substring(from));
+            countOfNodes += countOfPromisingChildren * countOfChildren;
+
+        } while (countOfPromisingChildren != 0 && from < codedString.length());
+        return countOfNodes;
+    }
+
+    /**
+     * estimates time complexity of algorithm
+     * based on monte carlo algorithm
+     *
+     * @return number of nodes which algorithm checks
+     */
+    public double estimateTimeComplexity(String codedString) {
+        int size = 200;
+        double estimatedTime = 0;
+        for (int i = 0; i < size; i++) {
+            estimatedTime += countOfCalls(codedString);
+        }
+
+        return estimatedTime / size;
+    }
+
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         JamesBond jamesBond = new JamesBond();
-        String[] decodedStrings = jamesBond.decode(in.next());
+        String codedString = in.next();
+        String[] decodedStrings = jamesBond.decode(codedString);
         for (String decodedString : decodedStrings) {
             System.out.println(decodedString);
         }
+        System.out.println("Time Complexity : " + jamesBond.estimateTimeComplexity(codedString));
     }
 }
